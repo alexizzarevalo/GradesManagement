@@ -1,0 +1,21 @@
+{
+    "grades": {
+        "file": "Notas.xlsx",
+        "cells": {
+            "grade": "D103",
+            "carne": "D3"
+        }
+    },
+    "email": {
+        "smtp": {
+            "host": "smtp.gmail.com",
+            "port": "587"
+        },
+        "credentials": {
+            "email": "<email>",
+            "password": "<password>"
+        },
+        "subject": "Asunto del correo a enviar",
+        "body": "<h1>Contenido en html o texto plano</h1>"
+    }
+}
