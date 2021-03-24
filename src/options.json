@@ -1,6 +1,6 @@
 {
     "grades": {
-        "file": "Notas.xlsx",
+        "file": "../Notas.xlsx",
         "cells": {
             "grade": "D103",
             "carne": "D3"
