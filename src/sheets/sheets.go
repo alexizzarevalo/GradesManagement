@@ -1,4 +1,4 @@
-package main
+package sheets
 
 import (
 	"encoding/json"
@@ -15,6 +15,11 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/sheets/v4"
 )
+
+type Cells struct {
+	Grade string
+	Carne string
+}
 
 type SheetsOptions struct {
 	Id          string
@@ -135,7 +140,7 @@ func checkAppFolder() {
 	}
 }
 
-func getGradesFromSpreadSheet(opt SheetsOptions) {
+func GetGradesFromSpreadSheet(opt SheetsOptions) {
 	checkAppFolder() // Si no existe el folder de la app, se crea
 
 	// Se extrae el carnet y la nota de las celdas espeficiadas

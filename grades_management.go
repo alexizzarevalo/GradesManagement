@@ -5,12 +5,16 @@ import (
 	"errors"
 	"log"
 	"os"
+
+	"github.com/alexizzarevalo/grades_management/src/email"
+	"github.com/alexizzarevalo/grades_management/src/excel"
+	"github.com/alexizzarevalo/grades_management/src/sheets"
 )
 
 type Options struct {
-	Excel  ExcelOptions
-	Sheets SheetsOptions
-	Email  EmailOptions
+	Excel  excel.ExcelOptions
+	Sheets sheets.SheetsOptions
+	Email  email.EmailOptions
 }
 
 func main() {
@@ -32,10 +36,10 @@ func main() {
 	json.Unmarshal(content, &opt)
 
 	if action == "grades" {
-		getGradesFromSpreadSheet(opt.Sheets)
+		sheets.GetGradesFromSpreadSheet(opt.Sheets)
 	} else if action == "grades-excel" {
-		getGrades(opt.Excel)
+		excel.GetGrades(opt.Excel)
 	} else if action == "email" {
-		sendEmail(opt.Email, []string{"dalexis.da@gmail.com"})
+		email.SendEmail(opt.Email, []string{"dalexis.da@gmail.com"})
 	}
 }

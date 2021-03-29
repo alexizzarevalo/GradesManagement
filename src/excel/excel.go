@@ -1,4 +1,4 @@
-package main
+package excel
 
 import (
 	"errors"
@@ -34,7 +34,7 @@ func extractGrades(xlsx *excelize.File, carneCell, gradeCell string) {
 	}
 }
 
-func getGrades(opt ExcelOptions) {
+func GetGrades(opt ExcelOptions) {
 	ext := filepath.Ext(opt.File)
 	fileName := strings.Replace(opt.File, ext, "", 1)
 

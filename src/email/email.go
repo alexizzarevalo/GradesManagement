@@ -1,4 +1,4 @@
-package main
+package email
 
 import (
 	"bytes"
@@ -23,7 +23,7 @@ type EmailOptions struct {
 	Body        string
 }
 
-func sendEmail(opt EmailOptions, to []string) {
+func SendEmail(opt EmailOptions, to []string) {
 	// Sender data.
 	from := opt.Credentials.Email
 	password := opt.Credentials.Password
