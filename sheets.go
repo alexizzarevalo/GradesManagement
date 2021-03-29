@@ -27,7 +27,8 @@ func getClient(config *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
 	// created automatically when the authorization flow completes for the first
 	// time.
-	tokFile := "token.json"
+
+	tokFile := getFilePath("token.json")
 	tok, err := tokenFromFile(tokFile)
 	if err != nil {
 		tok = getTokenFromWeb(config)
@@ -77,13 +78,20 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func getDefaultCredentialPath() string {
+func getFolderPath() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatal(err)
 	}
-	credentialsDir := path.Join(homeDir, ".grades_management", "credentials.json")
-	return credentialsDir
+	appFolder := path.Join(homeDir, ".grades_management")
+
+	return appFolder
+}
+
+func getFilePath(filename string) string {
+	appFolder := getFolderPath()
+	filePath := path.Join(appFolder, filename)
+	return filePath
 }
 
 func getCredentialBytes(credentials string) []byte {
@@ -91,7 +99,7 @@ func getCredentialBytes(credentials string) []byte {
 	if strings.Compare(credentials, "") != 0 {
 		path = credentials
 	} else {
-		path = getDefaultCredentialPath()
+		path = getFilePath("credentials.json")
 	}
 
 	b, err := ioutil.ReadFile(path)
@@ -119,7 +127,17 @@ func getSheetService(credentials string) *sheets.Service {
 	return srv
 }
 
+func checkAppFolder() {
+	appFolder := getFolderPath()
+	_, err := os.ReadDir(appFolder)
+	if err != nil {
+		os.Mkdir(appFolder, 0777)
+	}
+}
+
 func getGradesFromSpreadSheet(opt SheetsOptions) {
+	checkAppFolder() // Si no existe el folder de la app, se crea
+
 	// Se extrae el carnet y la nota de las celdas espeficiadas
 	srv := getSheetService(opt.Credentials)
 	spreadsheetId := opt.Id
