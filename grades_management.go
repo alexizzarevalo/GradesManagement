@@ -8,7 +8,8 @@ import (
 )
 
 type Options struct {
-	Grades GradesOptions
+	Excel  ExcelOptions
+	Sheets SheetsOptions
 	Email  EmailOptions
 }
 
@@ -31,7 +32,9 @@ func main() {
 	json.Unmarshal(content, &opt)
 
 	if action == "grades" {
-		getGrades(opt.Grades)
+		getGradesFromSpreadSheet(opt.Sheets)
+	} else if action == "grades-excel" {
+		getGrades(opt.Excel)
 	} else if action == "email" {
 		sendEmail(opt.Email, []string{"dalexis.da@gmail.com"})
 	}

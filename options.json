@@ -1,8 +1,15 @@
 {
-    "grades": {
+    "excel": {
         "file": "Notas.xlsx",
         "cells": {
             "grade": "D103",
+            "carne": "D3"
+        }
+    },
+    "sheets": {
+        "id": "1dS5j_6FtlvTbUmMiElRPU8A_JULeDCbmnghaDxa45co",
+        "cells": {
+            "grade": "D17",
             "carne": "D3"
         }
     },

@@ -15,7 +15,7 @@ type Cells struct {
 	Carne string
 }
 
-type GradesOptions struct {
+type ExcelOptions struct {
 	File  string
 	Cells Cells
 }
@@ -34,7 +34,7 @@ func extractGrades(xlsx *excelize.File, carneCell, gradeCell string) {
 	}
 }
 
-func getGrades(opt GradesOptions) {
+func getGrades(opt ExcelOptions) {
 	ext := filepath.Ext(opt.File)
 	fileName := strings.Replace(opt.File, ext, "", 1)
 
