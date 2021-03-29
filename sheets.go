@@ -7,6 +7,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"strings"
 
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
@@ -15,8 +17,9 @@ import (
 )
 
 type SheetsOptions struct {
-	Id    string
-	Cells Cells
+	Id          string
+	Credentials string
+	Cells       Cells
 }
 
 // Retrieve a token, saves the token, then returns the generated client.
@@ -74,12 +77,32 @@ func saveToken(path string, token *oauth2.Token) {
 	json.NewEncoder(f).Encode(token)
 }
 
-func getSheetService() *sheets.Service {
-	b, err := ioutil.ReadFile("credentials.json")
+func getDefaultCredentialPath() string {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Fatal(err)
+	}
+	credentialsDir := path.Join(homeDir, ".grades_management", "credentials.json")
+	return credentialsDir
+}
+
+func getCredentialBytes(credentials string) []byte {
+	var path string
+	if strings.Compare(credentials, "") != 0 {
+		path = credentials
+	} else {
+		path = getDefaultCredentialPath()
+	}
+
+	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
+	return b
+}
 
+func getSheetService(credentials string) *sheets.Service {
+	b := getCredentialBytes(credentials)
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, "https://www.googleapis.com/auth/spreadsheets.readonly")
 	if err != nil {
@@ -98,7 +121,7 @@ func getSheetService() *sheets.Service {
 
 func getGradesFromSpreadSheet(opt SheetsOptions) {
 	// Se extrae el carnet y la nota de las celdas espeficiadas
-	srv := getSheetService()
+	srv := getSheetService(opt.Credentials)
 	spreadsheetId := opt.Id
 
 	spreadsheet, err := srv.Spreadsheets.Get(spreadsheetId).Do()
