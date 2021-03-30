@@ -175,6 +175,41 @@ Ejecutar el siguiente comando:
 ./grades_management email-only options.json > emailLog.log
 ```
 
+## Credenciales de Google Cloud Project
+
+Puede generar credenciales de acceso de un proyecto propio de Google Cloud
+
+Cree un proyecto en la siguiente url: https://console.cloud.google.com/projectcreate
+
+![Crear proyecto](images/create_project.jpg)
+
+Habilite la API de Google Sheets: https://console.cloud.google.com/apis/library/sheets.googleapis.com
+
+Habilite la API de Google Drive: https://console.cloud.google.com/apis/library/drive.googleapis.com
+
+![Habilitar APIs](images/drive_api.jpg)
+
+En la siguiente URL cree una credencial
+
+https://console.cloud.google.com/apis/credentials
+
+Seleccione ID de cliente de OAuth
+![Credenciales](images/credentials.jpg)
+
+Configure una pantalla de concentimiento
+![Pantalla de concentimiento](images/screen.jpg)
+
+Siga todos los pasos solicitados
+![Pantalla de concentimiento](images/screen_2.jpg)
+
+Cuando ya tiene la pantalla de concentimiento, regrese a crear el ID de cliente de OAuth
+
+Seleccione aplicacion de escritorio y elija un nombre.
+![Crear credencial](images/credentials_2.jpg)
+
+Descargue su credencial y usela en el programa.
+![Descargar credencial](images/download_credentials.jpg)
+
 ## Install dependencies
 
 	go mod tidy
