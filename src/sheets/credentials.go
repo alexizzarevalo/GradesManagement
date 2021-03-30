@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 
 	"golang.org/x/net/context"
@@ -27,14 +27,15 @@ func getFolderPath() string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	appFolder := path.Join(homeDir, ".grades_management")
+
+	appFolder := filepath.Join(homeDir, ".grades_management")
 
 	return appFolder
 }
 
 func getFilePath(filename string) string {
 	appFolder := getFolderPath()
-	filePath := path.Join(appFolder, filename)
+	filePath := filepath.Join(appFolder, filename)
 	return filePath
 }
 
