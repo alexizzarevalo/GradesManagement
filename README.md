@@ -60,7 +60,7 @@ La configuración necesaria para esta tarea en el archivo de opciones es:
 ```json
 {
 	"excel": {
-        "file": "Notas.xlsx",
+		"file": "Notas.xlsx",
         "cells": {
             "grade": "D103",
             "carne": "D3"
@@ -179,9 +179,13 @@ Ejecutar el siguiente comando:
 
 Puede generar credenciales de acceso de un proyecto propio de Google Cloud
 
-Cree un proyecto en la siguiente url: https://console.cloud.google.com/projectcreate
+### Cree un proyecto en GCP
+
+Creelo en la siguiente url: https://console.cloud.google.com/projectcreate
 
 ![Crear proyecto](images/create_project.jpg)
+
+### Habilite las APIs de Google
 
 Habilite la API de Google Sheets: https://console.cloud.google.com/apis/library/sheets.googleapis.com
 
@@ -189,26 +193,42 @@ Habilite la API de Google Drive: https://console.cloud.google.com/apis/library/d
 
 ![Habilitar APIs](images/drive_api.jpg)
 
+### Cree una credencial
+
 En la siguiente URL cree una credencial
 
 https://console.cloud.google.com/apis/credentials
 
 Seleccione ID de cliente de OAuth
+
 ![Credenciales](images/credentials.jpg)
 
 Configure una pantalla de concentimiento
+
 ![Pantalla de concentimiento](images/screen.jpg)
 
 Siga todos los pasos solicitados
+
 ![Pantalla de concentimiento](images/screen_2.jpg)
 
 Cuando ya tiene la pantalla de concentimiento, regrese a crear el ID de cliente de OAuth
 
 Seleccione aplicacion de escritorio y elija un nombre.
+
 ![Crear credencial](images/credentials_2.jpg)
 
 Descargue su credencial y usela en el programa.
+
 ![Descargar credencial](images/download_credentials.jpg)
+
+## Donde colocar la credencial
+
+El programa busca la credencial en la ruta `~/.grades_management/credentials.json` por lo que puede colocar su archivo en esa ubicacion.
+
+Si desea utilizar otra ubicacion es libre de hacerlo, siempre y cuando modifique el archivo de opciones
+colocando en la clave `sheets.credentials` la **ruta hacia el archivo de credenciales**.
+
+---
 
 ## Install dependencies
 

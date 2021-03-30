@@ -57,7 +57,10 @@ func getCredentialBytes(credentials string) []byte {
 
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Fatalf("Unable to read client secret file: %v", err)
+		fmt.Printf("No se pudo leer las credenciales: %v\n\r", err)
+		fmt.Println("\n\rSolicite al desarrollador las credenciales o genere su propia credencial siguiendo esta guia:")
+		fmt.Println("https://github.com/alexizzarevalo/GradesManagement#credenciales-de-google-cloud-project")
+		os.Exit(1)
 	}
 	return b
 }

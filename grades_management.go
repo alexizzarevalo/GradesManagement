@@ -19,13 +19,15 @@ type Options struct {
 }
 
 func main() {
-	action := os.Args[1]
 	var optionsFile string
 	if len(os.Args) == 3 {
 		optionsFile = os.Args[2]
 	} else {
-		log.Fatal(errors.New("debe especificar la ruta del options.json"))
+		fmt.Println("grades_management necesita la accion a realizar seguido de la ruta del archivo de opciones")
+		fmt.Println("grades_management [grades|grades-excel|email|email-only] options.json")
+		os.Exit(1)
 	}
+	action := os.Args[1]
 
 	content, err := os.ReadFile(optionsFile)
 	if err != nil {
