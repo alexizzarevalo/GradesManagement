@@ -19,7 +19,6 @@ type Options struct {
 
 func main() {
 	action := os.Args[1]
-
 	var optionsFile string
 	if len(os.Args) == 3 {
 		optionsFile = os.Args[2]
@@ -41,5 +40,7 @@ func main() {
 		excel.GetGrades(opt.Excel)
 	} else if action == "email" {
 		email.SendEmail(opt.Email, []string{"dalexis.da@gmail.com"})
+	} else if action == "export" {
+		sheets.ExportSheetsInPDF(opt.Sheets)
 	}
 }
