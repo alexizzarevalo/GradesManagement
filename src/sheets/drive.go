@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/alexizzarevalo/grades_management/src/email"
 	"google.golang.org/api/drive/v3"
 )
 
@@ -58,15 +59,24 @@ func Export(srv *drive.Service, spreadsheetId, name string) {
 	}
 }
 
-func ExportSheetsInPDF(opt SheetsOptions) {
+func ExportSheetsInPDFAndSendEmail(opt SheetsOptions, emailOpt email.EmailOptions) {
 	srv := getDriveService(opt.Credentials)
 	srvSheets := getSheetService(opt.Credentials)
+	students := email.ReadStudentsCsv()
 
 	newSpreadsheets := CopySheetsIntoSeparateSpreadSheets(srvSheets, opt.Id)
 	for _, newSpreadsheet := range newSpreadsheets {
-		pdfName := newSpreadsheet.Name + ".pdf"
+		carnet := newSpreadsheet.Name
+		pdfName := carnet + ".pdf"
 		DeleteSheet(srvSheets, newSpreadsheet.SpreadsheetId, 0)
 		Export(srv, newSpreadsheet.SpreadsheetId, pdfName)
 		fmt.Println("Pdf generado: ", pdfName)
+
+		to, err := email.GetEmailByCarne(carnet, students, emailOpt.StudentsCsv)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		email.SendEmailWithAttachment(emailOpt, []string{to}, pdfName, pdfName)
 	}
 }

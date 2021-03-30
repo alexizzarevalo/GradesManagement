@@ -17,13 +17,17 @@
     "email": {
         "smtp": {
             "host": "smtp.gmail.com",
-            "port": "587"
+            "port": "465"
         },
         "credentials": {
             "email": "<email>",
             "password": "<password>"
         },
+        "studentsCsv": {
+            "carneIndex": 0,
+            "emailIndex": 1
+        },
         "subject": "Asunto del correo a enviar",
-        "body": "<h1>Contenido en html o texto plano</h1>"
+        "body": "<html><body><h1>Titulo en el cuerpo</h1> <p>Mensaje</p></body></html>\r\n"
     }
 }
