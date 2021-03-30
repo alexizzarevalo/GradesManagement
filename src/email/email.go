@@ -26,6 +26,7 @@ type Smtp struct {
 }
 
 type StudentsCsv struct {
+	Path       string
 	CarneIndex int
 	EmailIndex int
 }
@@ -167,8 +168,8 @@ func GetEmailByCarne(carne string, records [][]string, scsv StudentsCsv) (string
 	return "", errors.New("El siguiente carnet no existe en el csv de alumnos: " + carne)
 }
 
-func ReadStudentsCsv() [][]string {
-	b, err := os.ReadFile("Alumnos.csv")
+func ReadStudentsCsv(opt StudentsCsv) [][]string {
+	b, err := os.ReadFile(opt.Path)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -188,7 +189,7 @@ func EmailOnly(opt EmailOptions) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	students := ReadStudentsCsv()
+	students := ReadStudentsCsv(opt.StudentsCsv)
 	for _, file := range entries {
 		filename := file.Name()
 		ext := filepath.Ext(filename)

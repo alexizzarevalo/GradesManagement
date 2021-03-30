@@ -24,6 +24,7 @@
             "password": "<password>"
         },
         "studentsCsv": {
+            "path": "Alumnos.csv",
             "carneIndex": 0,
             "emailIndex": 1
         },

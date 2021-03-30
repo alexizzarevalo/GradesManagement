@@ -62,7 +62,7 @@ func Export(srv *drive.Service, spreadsheetId, name string) {
 func ExportSheetsInPDFAndSendEmail(opt SheetsOptions, emailOpt email.EmailOptions) {
 	srv := getDriveService(opt.Credentials)
 	srvSheets := getSheetService(opt.Credentials)
-	students := email.ReadStudentsCsv()
+	students := email.ReadStudentsCsv(emailOpt.StudentsCsv)
 
 	newSpreadsheets := CopySheetsIntoSeparateSpreadSheets(srvSheets, opt.Id)
 	for _, newSpreadsheet := range newSpreadsheets {
