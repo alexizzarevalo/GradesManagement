@@ -3,3 +3,6 @@ token.json
 Notas.xlsx
 *.pdf
 *.csv
+grades_management-darwin-amd64
+grades_management-linux-amd64
+grades_management-windows-amd64.exe
