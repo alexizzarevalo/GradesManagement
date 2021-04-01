@@ -2,6 +2,24 @@
 
 Programa de consola para extraer las notas de alumnos de un archivo Excel y para envío de correos para optimizar tareas que realizo como auxiliar
 
+## Descargar
+
+#### [Ultima version](https://github.com/alexizzarevalo/GradesManagement/releases/latest) 
+
+- windows-amd64
+- darwin-amd64
+- linux-amd64
+
+## Indice
+1. [Extraer notas de los alumnos](#extraer-notas-de-los-alumnos)
+	- [De un Spreadsheet de Google Sheets](#de-un-spreadsheet-de-google-sheets)
+	- [De un Excel de Microsoft Office](#de-un-excel-de-microsoft-office)
+2. [Generar PDFs de cada hoja del Spreadsheet de Google Sheets](#exportar-a-pdf-cada-hoja-del-spreadsheet-de-google-sheets)
+3. [Enviar correo a los alumnos con su PDF](#enviar-correo-a-los-alumnos-con-su-pdf)
+4. [Exportar PDFs y enviar correo a los alumnos](#exportar-pdfs-y-enviar-correo-a-los-alumnos)
+
+***
+
 ## Token
 
 La aplicacion le solicitará permisos para acceder a Google Drive y Google Sheets.
@@ -36,7 +54,7 @@ Donde:
 - id: id de la hoja de calculo de Google Sheet. Se puede obtener de la URL del archivo:
 	- `https://docs.google.com/spreadsheets/d/<spreadsheetId>/edit`
 
-- credentials: ruta del archivo de credenciales que proporciona Google al crear un proyecto. **Dejar vacio para usar la ruta por defecto del programa** `~/.grades_management/credentials.json`
+- credentials: ruta del archivo de credenciales para conectarse a la API de Google. **Dejar vacio para usar la ruta por defecto del programa** `~/.grades_management/credentials.json`
 
 - cells:
 
@@ -88,17 +106,7 @@ Ejecutar uno de los siguientes comandos:
 ./grades_management grades-excel options.json > notas.csv
 ```
 
-## Enviar correo a los alumnos con sus notas
-
-Debe realizar primero lo siguiente:
-
-> **Para exportar** correctamente, cada hoja debe tener como nombre el carne del alumno
-
-> **Para enviar correo** debe tener un archivo CSV con los datos de los alumnos. **Como minimo el Carnet y Correo**
-
-> **Para enviar correo** Tienen que activar las aplicaciones inseguras o generar una contraseña de aplicacion en configuracion de la cuenta de Gmail
-
-### Exportar a PDF cada hoja del Spreadsheet de Google Sheets
+## Exportar a PDF cada hoja del Spreadsheet de Google Sheets
 
 Esta funcion separa cada hoja del spreadsheet en un nuevo spreadsheet para luego ser exportado a PDF y descargarlo.
 
@@ -107,8 +115,46 @@ La configuración necesaria para esta tarea en el archivo de opciones es:
 ```json
 {
 	"sheets": {
-		"id": "<spreadsheetId>"
-	},
+		"id": "<spreadsheetId>",
+		"credentials": "credentials.json"
+	}
+}
+```
+
+> **Para exportar** correctamente, cada hoja debe tener como nombre el carne del alumno
+
+Donde:
+
+- id: id de la hoja de calculo de Google Sheet. Se puede obtener de la URL del archivo:
+	- `https://docs.google.com/spreadsheets/d/<spreadsheetId>/edit`
+
+- credentials: ruta del archivo de credenciales para conectarse a la API de Google. **Dejar vacio para usar la ruta por defecto del programa** `~/.grades_management/credentials.json`
+
+Ejecutar el siguiente comando:
+
+```bash
+./grades_management export options.json
+```
+
+## Enviar correo a los alumnos con su PDF
+
+> **Para enviar correo** debe tener un archivo CSV con los datos de los alumnos. **Como minimo el Carnet y Correo**
+
+> Los PDFs deben tener como nombre el carnet del alumno. (Para relacionarlo con el CSV de alumnos)
+
+> **Para enviar correo**, en configuracion de la cuenta de Gmail se debe activar las aplicaciones inseguras o generar una contraseña de aplicacion en dado caso se tenga configurado doble factor de autenticacion
+
+Ejemplo de archivo csv de alumnos
+
+```csv
+carnet,correo,nombre,etc
+202101523,correo@gmail.com,alumno ejemplo,etc
+```
+
+La configuración necesaria para esta tarea en el archivo de opciones es:
+
+```json
+{
 	"email": {
         "smtp": {
             "host": "smtp.gmail.com",
@@ -131,13 +177,10 @@ La configuración necesaria para esta tarea en el archivo de opciones es:
 
 Donde:
 
-- id: id de la hoja de calculo de Google Sheet. Se puede obtener de la URL del archivo:
-	- `https://docs.google.com/spreadsheets/d/<spreadsheetId>/edit`
-
 - credentials:
 
 	- **email** Correo de gmail emisor.
-	- **password** Contraseña del correo de gmail emisor.
+	- **password** Contraseña del correo de gmail emisor (si activo aplicaciones inseguras) o contraseña de aplicacion (si tiene segundo factor de autenticacion)
 
 - studentsCsv:
 
@@ -149,6 +192,8 @@ Donde:
 
 - body: Cuerpo del correo (Puede ser en formato HTML o texto plano)
 
+> La opcion de smtp debe estar en smtp.gmail.com y 465 respectivamente
+
 Ejecutar el siguiente comando:
 
 ```bash
@@ -159,20 +204,16 @@ Ejecutar el siguiente comando:
 ./grades_management email options.json > emailLog.log
 ```
 
-### Enviar correo sin descargar PDF
+## Exportar PDFs y enviar correo a los alumnos
 
-Es funcion se debe utilizar cuando ya tiene los archivos PDF descargados y no quiere volver a generarlos.
+Si se desea exportar los PDF y seguidamente enviarlos y no quiere ejecutar el comando `export` y luego `email` puede realizar ambas acciones con el comando `export-email`.
 
-La configuración necesaria para esta tarea en el archivo de opciones es la misma que el paso anterior excepto que **no se necesita la seccion sheets**
+> Debe tener en options.json la configuracion de export y la de email
 
 Ejecutar el siguiente comando:
 
 ```bash
-# Mostrará en la consola si no se encontró el correo de un alumno
-./grades_management email-only options.json
-
-# Guardar la salida en un archivo de texto
-./grades_management email-only options.json > emailLog.log
+./grades_management export-email options.json
 ```
 
 ## Credenciales de Google Cloud Project
