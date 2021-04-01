@@ -8,11 +8,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/smtp"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/alexizzarevalo/grades_management/src/msg"
 )
 
 type Credentials struct {
@@ -77,14 +78,14 @@ func SendEmailWithAttachment(opt EmailOptions, tos []string, attachmentFilePath 
 	// log.Println("Establish TLS connection")
 	conn, connErr := tls.Dial("tcp", fmt.Sprintf("%s:%s", opt.Smtp.Host, opt.Smtp.Port), &tlsConfig)
 	if connErr != nil {
-		log.Panic(connErr)
+		msg.Error(connErr)
 	}
 	defer conn.Close()
 
 	// log.Println("create new email client")
 	client, clientErr := smtp.NewClient(conn, opt.Smtp.Host)
 	if clientErr != nil {
-		log.Panic(clientErr)
+		msg.Error(clientErr)
 	}
 	defer client.Close()
 
@@ -92,24 +93,24 @@ func SendEmailWithAttachment(opt EmailOptions, tos []string, attachmentFilePath 
 	auth := smtp.PlainAuth("", opt.Credentials.Email, opt.Credentials.Password, opt.Smtp.Host)
 
 	if err := client.Auth(auth); err != nil {
-		log.Panic(err)
+		msg.Error(errors.New("Verifique las credenciales de su cuenta de Gmail. " + err.Error()))
 	}
 
 	// log.Println("Start write mail content")
 	// log.Println("Set 'FROM'")
 	if err := client.Mail(opt.Credentials.Email); err != nil {
-		log.Panic(err)
+		msg.Error(err)
 	}
 	// log.Println("Set 'TO(s)'")
 	for _, to := range tos {
 		if err := client.Rcpt(to); err != nil {
-			log.Panic(err)
+			msg.Error(err)
 		}
 	}
 
 	writer, writerErr := client.Data()
 	if writerErr != nil {
-		log.Panic(writerErr)
+		msg.Error(writerErr)
 	}
 
 	// Basic email headers
@@ -139,23 +140,23 @@ func SendEmailWithAttachment(opt EmailOptions, tos []string, attachmentFilePath 
 	// Read file
 	rawFile, fileErr := ioutil.ReadFile(attachmentFilePath)
 	if fileErr != nil {
-		log.Panic(fileErr)
+		msg.Error(fileErr)
 	}
 	sampleMsg += "\r\n" + base64.StdEncoding.EncodeToString(rawFile)
 
 	// Write into email client stream writter
 	// log.Println("Write content into client writter I/O")
 	if _, err := writer.Write([]byte(sampleMsg)); err != nil {
-		log.Panic(err)
+		msg.Error(err)
 	}
 
 	if closeErr := writer.Close(); closeErr != nil {
-		log.Panic(closeErr)
+		msg.Error(closeErr)
 	}
 
 	client.Quit()
 
-	log.Println("Email sent to: " + tos[0])
+	msg.Success("Email sent to: " + tos[0])
 }
 
 func GetEmailByCarne(carne string, records [][]string, scsv StudentsCsv) (string, error) {
@@ -171,7 +172,7 @@ func GetEmailByCarne(carne string, records [][]string, scsv StudentsCsv) (string
 func ReadStudentsCsv(opt StudentsCsv) [][]string {
 	b, err := os.ReadFile(opt.Path)
 	if err != nil {
-		log.Fatal(err)
+		msg.Error(err)
 	}
 
 	r := csv.NewReader(strings.NewReader(string(b)))
@@ -179,7 +180,7 @@ func ReadStudentsCsv(opt StudentsCsv) [][]string {
 
 	records, err := r.ReadAll()
 	if err != nil {
-		log.Fatal(err)
+		msg.Error(err)
 	}
 	return records
 }
@@ -187,7 +188,7 @@ func ReadStudentsCsv(opt StudentsCsv) [][]string {
 func EmailOnly(opt EmailOptions) {
 	entries, err := os.ReadDir(".")
 	if err != nil {
-		log.Fatal(err)
+		msg.Error(err)
 	}
 	students := ReadStudentsCsv(opt.StudentsCsv)
 	for _, file := range entries {
@@ -199,7 +200,7 @@ func EmailOnly(opt EmailOptions) {
 			to, err := GetEmailByCarne(carnet, students, opt.StudentsCsv)
 
 			if err != nil {
-				fmt.Println(err)
+				msg.Warning(err.Error())
 				continue
 			}
 			SendEmailWithAttachment(opt, []string{to}, filename, filename)

@@ -2,14 +2,15 @@ package sheets
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/alexizzarevalo/grades_management/src/msg"
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -25,7 +26,7 @@ var scopes = []string{
 func getFolderPath() string {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		log.Fatal(err)
+		msg.Error(err)
 	}
 
 	appFolder := filepath.Join(homeDir, ".grades_management")
@@ -57,9 +58,9 @@ func getCredentialBytes(credentials string) []byte {
 
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
-		fmt.Printf("No se pudo leer las credenciales: %v\n\r", err)
-		fmt.Println("\n\rSolicite al desarrollador las credenciales o genere su propia credencial siguiendo esta guia:")
-		fmt.Println("https://github.com/alexizzarevalo/GradesManagement#credenciales-de-google-cloud-project")
+		msg.ErrorWithoutExit(errors.New("No se pudo leer las credenciales: " + err.Error()))
+		msg.Info("Solicite al desarrollador las credenciales o genere su propia credencial siguiendo esta guia:")
+		msg.Info("https://github.com/alexizzarevalo/GradesManagement#credenciales-de-google-cloud-project")
 		os.Exit(1)
 	}
 	return b
@@ -83,17 +84,17 @@ func getClient(config *oauth2.Config) *http.Client {
 // Request a token from the web, then returns the retrieved token.
 func getTokenFromWeb(config *oauth2.Config) *oauth2.Token {
 	authURL := config.AuthCodeURL("state-token", oauth2.AccessTypeOffline)
-	fmt.Printf("Go to the following link in your browser then type the "+
-		"authorization code: \n%v\n", authURL)
+	msg.Info("Vaya al siguiente enlace en su navegador y luego pegue el código de autorización: ")
+	fmt.Printf("\n%v\n", authURL)
 
 	var authCode string
 	if _, err := fmt.Scan(&authCode); err != nil {
-		log.Fatalf("Unable to read authorization code: %v", err)
+		msg.Error(errors.New("No se pudo leer el codigo de autorizacion: " + err.Error()))
 	}
 
 	tok, err := config.Exchange(context.TODO(), authCode)
 	if err != nil {
-		log.Fatalf("Unable to retrieve token from web: %v", err)
+		msg.Error(errors.New("No se pudo obtener el token desde la web: " + err.Error()))
 	}
 	return tok
 }
@@ -112,10 +113,10 @@ func tokenFromFile(file string) (*oauth2.Token, error) {
 
 // Saves a token to a file path.
 func saveToken(path string, token *oauth2.Token) {
-	fmt.Printf("Saving credential file to: %s\n", path)
+	msg.Info("Guardando el token oauth en: " + path)
 	f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0600)
 	if err != nil {
-		log.Fatalf("Unable to cache oauth token: %v", err)
+		msg.Error(errors.New("No se pudo guardar el token oauth: " + err.Error()))
 	}
 	defer f.Close()
 	json.NewEncoder(f).Encode(token)
@@ -126,7 +127,7 @@ func getHttpClient(credentials string) *http.Client {
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(b, scopes...)
 	if err != nil {
-		log.Fatalf("Unable to parse client secret file to config: %v", err)
+		msg.Error(errors.New("No se pudo analizar el archivo de credeciales. " + err.Error()))
 	}
 	client := getClient(config)
 

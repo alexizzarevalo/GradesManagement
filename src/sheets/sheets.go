@@ -1,10 +1,11 @@
 package sheets
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"strings"
 
+	"github.com/alexizzarevalo/grades_management/src/msg"
 	"google.golang.org/api/sheets/v4"
 )
 
@@ -23,7 +24,7 @@ func getSheetService(credentials string) *sheets.Service {
 	srv, err := sheets.New(getHttpClient(credentials))
 
 	if err != nil {
-		log.Fatalf("Unable to retrieve Sheets client: %v", err)
+		msg.Error(errors.New("No se pudo recuperar el cliente de Sheets. " + err.Error()))
 	}
 
 	return srv
@@ -47,14 +48,22 @@ func GetGradesFromSpreadSheet(opt SheetsOptions) {
 
 	values, err := srv.Spreadsheets.Values.BatchGet(spreadsheetId).Ranges(ranges...).Do()
 	if err != nil {
-		log.Fatalf("Error al intentar obtener los valores. %v", err)
+		msg.Error(errors.New("Error al intentar obtener los valores de carnet y nota. " + err.Error()))
 	}
 
 	fmt.Println("Carne,Nota")
+	var omited = "Se omitio: "
 	for i := 0; i < len(values.ValueRanges); i += 2 {
-		carne := values.ValueRanges[i].Values[0][0]
-		grade := values.ValueRanges[i+1].Values[0][0]
-		fmt.Printf("%v,%v\n", carne, grade)
+		if len(values.ValueRanges[i].Values) == 1 && len(values.ValueRanges[i+1].Values) == 1 {
+			carne := values.ValueRanges[i].Values[0][0]
+			grade := values.ValueRanges[i+1].Values[0][0]
+			fmt.Printf("%v,%v\n", carne, grade)
+		} else {
+			omited += strings.Split(values.ValueRanges[i].Range, "!")[0] + ", "
+		}
+	}
+	if strings.Compare(omited, "Se omitio: ") != 0 {
+		msg.Warning(omited + "porque no se encontro carnet o nota.")
 	}
 }
 
@@ -74,7 +83,7 @@ func createSpreadsheet(srv *sheets.Service, title string) string {
 	}).Do()
 
 	if err != nil {
-		log.Fatal(err)
+		msg.Error(errors.New("No se pudo crear la spreadsheet " + title + " " + err.Error()))
 	}
 
 	return spreadsheet.SpreadsheetId
@@ -83,7 +92,7 @@ func createSpreadsheet(srv *sheets.Service, title string) string {
 func GetSpreadsheetById(srv *sheets.Service, spreadsheetId string) *sheets.Spreadsheet {
 	spreadsheet, err := srv.Spreadsheets.Get(spreadsheetId).Do()
 	if err != nil {
-		log.Fatalf("Error al intentar obtener la hoja de calculo. %v", err)
+		msg.Error(errors.New("No se pudo obtener la spreadsheet. " + err.Error()))
 	}
 	return spreadsheet
 }
@@ -94,7 +103,7 @@ type NewSpreadsheet struct {
 	Name          string
 }
 
-func CopySheetsIntoSeparateSpreadSheets(srv *sheets.Service, fromSpreadsheetId string) []NewSpreadsheet {
+func CopySheetsIntoSeparateSpreadSheets(srv *sheets.Service, fromSpreadsheetId string) ([]NewSpreadsheet, error) {
 	// Se obtiene la spreadsheet deseada
 	originalSpreadsheet := GetSpreadsheetById(srv, fromSpreadsheetId)
 	var newSpreadsheetIds []NewSpreadsheet
@@ -111,7 +120,7 @@ func CopySheetsIntoSeparateSpreadSheets(srv *sheets.Service, fromSpreadsheetId s
 			}).Do()
 
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 
 		newSpreadsheetIds = append(newSpreadsheetIds, NewSpreadsheet{
@@ -121,10 +130,10 @@ func CopySheetsIntoSeparateSpreadSheets(srv *sheets.Service, fromSpreadsheetId s
 		})
 	}
 
-	return newSpreadsheetIds
+	return newSpreadsheetIds, nil
 }
 
-func DeleteSheet(srv *sheets.Service, spreadsheetId string, sheetId int64) {
+func DeleteSheet(srv *sheets.Service, spreadsheetId string, sheetId int64) error {
 	_, err := srv.Spreadsheets.BatchUpdate(spreadsheetId, &sheets.BatchUpdateSpreadsheetRequest{
 		Requests: []*sheets.Request{
 			{
@@ -135,7 +144,5 @@ func DeleteSheet(srv *sheets.Service, spreadsheetId string, sheetId int64) {
 		},
 	}).Do()
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	return err
 }
