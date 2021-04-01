@@ -41,14 +41,16 @@ func main() {
 		sheets.GetGradesFromSpreadSheet(opt.Sheets)
 	} else if action == "grades-excel" {
 		excel.GetGrades(opt.Excel)
-	} else if action == "email" || action == "email-only" {
+	} else if action == "export" {
+		sheets.ExportSheetsInPDF(opt.Sheets)
+	} else if action == "email" || action == "export-email" {
 		fmt.Println("NOTE: You need to turn on 'less secure apps' options: https://myaccount.google.com/lesssecureapps")
 		fmt.Println("NOTE: If you have SecondFactorAuthentication: Application-specific password required: https://myaccount.google.com/apppasswords\n\r")
 
 		if action == "email" {
-			sheets.ExportSheetsInPDFAndSendEmail(opt.Sheets, opt.Email)
-		} else {
 			email.EmailOnly(opt.Email)
+		} else {
+			sheets.ExportSheetsInPDFAndSendEmail(opt.Sheets, opt.Email)
 		}
 	}
 }

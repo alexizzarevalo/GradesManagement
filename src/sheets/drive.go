@@ -59,10 +59,9 @@ func Export(srv *drive.Service, spreadsheetId, name string) {
 	}
 }
 
-func ExportSheetsInPDFAndSendEmail(opt SheetsOptions, emailOpt email.EmailOptions) {
+func ExportSheetsInPDF(opt SheetsOptions) {
 	srv := getDriveService(opt.Credentials)
 	srvSheets := getSheetService(opt.Credentials)
-	students := email.ReadStudentsCsv(emailOpt.StudentsCsv)
 
 	newSpreadsheets := CopySheetsIntoSeparateSpreadSheets(srvSheets, opt.Id)
 	for _, newSpreadsheet := range newSpreadsheets {
@@ -71,12 +70,10 @@ func ExportSheetsInPDFAndSendEmail(opt SheetsOptions, emailOpt email.EmailOption
 		DeleteSheet(srvSheets, newSpreadsheet.SpreadsheetId, 0)
 		Export(srv, newSpreadsheet.SpreadsheetId, pdfName)
 		fmt.Println("Pdf generado: ", pdfName)
-
-		to, err := email.GetEmailByCarne(carnet, students, emailOpt.StudentsCsv)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-		email.SendEmailWithAttachment(emailOpt, []string{to}, pdfName, pdfName)
 	}
+}
+
+func ExportSheetsInPDFAndSendEmail(opt SheetsOptions, emailOpt email.EmailOptions) {
+	ExportSheetsInPDF(opt)
+	email.EmailOnly(emailOpt)
 }
