@@ -31,7 +31,6 @@ func main() {
 		fmt.Println("\texport         Exporta cada hoja de un Spreadsheet a PDF (Lo guarda en el directorio actual)")
 		fmt.Println("\temail          Envia correo electronico a cada alumno con los PDF (Debe existir un csv de alumnos)")
 		fmt.Println("\texport-email   Ejecuta el comando export y luego email")
-		fmt.Println("\texport-email   Ejecuta el comando export y luego email")
 		fmt.Println()
 		fmt.Println("\toptions.json   Ruta del archivo de opciones en formato json (Puede tener cualquier nombre)")
 		fmt.Println()

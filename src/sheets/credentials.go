@@ -20,7 +20,7 @@ import (
 
 var scopes = []string{
 	sheets.SpreadsheetsScope,
-	drive.DriveReadonlyScope,
+	drive.DriveFileScope,
 }
 
 func getFolderPath() string {

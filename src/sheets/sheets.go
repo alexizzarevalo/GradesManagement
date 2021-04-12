@@ -1,11 +1,13 @@
 package sheets
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/alexizzarevalo/grades_management/src/msg"
+	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
 )
 
@@ -21,7 +23,7 @@ type SheetsOptions struct {
 }
 
 func getSheetService(credentials string) *sheets.Service {
-	srv, err := sheets.New(getHttpClient(credentials))
+	srv, err := sheets.NewService(context.Background(), option.WithHTTPClient(getHttpClient(credentials)))
 
 	if err != nil {
 		msg.Error(errors.New("No se pudo recuperar el cliente de Sheets. " + err.Error()))

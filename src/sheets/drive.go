@@ -1,6 +1,7 @@
 package sheets
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -9,10 +10,11 @@ import (
 	"github.com/alexizzarevalo/grades_management/src/email"
 	"github.com/alexizzarevalo/grades_management/src/msg"
 	"google.golang.org/api/drive/v3"
+	"google.golang.org/api/option"
 )
 
 func getDriveService(credentials string) *drive.Service {
-	srv, err := drive.New(getHttpClient(credentials))
+	srv, err := drive.NewService(context.Background(), option.WithHTTPClient(getHttpClient(credentials)))
 
 	if err != nil {
 		msg.Error(errors.New("No se pudo recuperar el cliente de Drive. " + err.Error()))
