@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"sync"
 
 	"github.com/alexizzarevalo/grades_management/src/email"
 	"github.com/alexizzarevalo/grades_management/src/msg"
 	"google.golang.org/api/drive/v3"
 	"google.golang.org/api/option"
+	"google.golang.org/api/sheets/v4"
 )
 
 func getDriveService(credentials string) *drive.Service {
@@ -63,6 +65,33 @@ func Export(srv *drive.Service, spreadsheetId, name string) error {
 	return nil
 }
 
+func Pdf(srv *drive.Service, srvSheets *sheets.Service, newSpreadsheet NewSpreadsheet, wg *sync.WaitGroup) {
+	carnet := newSpreadsheet.Name
+	pdfName := carnet + ".pdf"
+	err := DeleteSheet(srvSheets, newSpreadsheet.SpreadsheetId, 0)
+	if err != nil {
+		msg.ErrorWithoutExit(errors.New("No se pudo eliminar la hoja del spreadsheet. " + err.Error()))
+		wg.Done()
+		return
+	}
+	err = Export(srv, newSpreadsheet.SpreadsheetId, pdfName)
+	if err != nil {
+		msg.ErrorWithoutExit(errors.New("No se pudo exportar el archivo de Google Sheet " + pdfName + " " + err.Error()))
+		wg.Done()
+		return
+	}
+	msg.Success("Pdf generado: " + pdfName)
+	wg.Done()
+}
+
+func DeleteSpreadsheet(srv *drive.Service, newSpreadsheet NewSpreadsheet, wg *sync.WaitGroup) {
+	err := srv.Files.Delete(newSpreadsheet.SpreadsheetId).Do()
+	if err != nil {
+		msg.ErrorWithoutExit(errors.New("No se pudo eliminar el archivo de Google Drive " + newSpreadsheet.Name + ".pdf " + err.Error()))
+	}
+	wg.Done()
+}
+
 func ExportSheetsInPDF(opt SheetsOptions) {
 	srv := getDriveService(opt.Credentials)
 	srvSheets := getSheetService(opt.Credentials)
@@ -71,21 +100,22 @@ func ExportSheetsInPDF(opt SheetsOptions) {
 	if err != nil {
 		msg.Error(errors.New("No se pudo copiar las hojas a un nuevo spreadsheet. " + err.Error()))
 	}
+
+	var wg sync.WaitGroup
+
+	// Se exporta a PDF cada Spreadsheet
+	wg.Add(len(newSpreadsheets))
 	for _, newSpreadsheet := range newSpreadsheets {
-		carnet := newSpreadsheet.Name
-		pdfName := carnet + ".pdf"
-		err := DeleteSheet(srvSheets, newSpreadsheet.SpreadsheetId, 0)
-		if err != nil {
-			msg.ErrorWithoutExit(errors.New("No se pudo eliminar la hoja del spreadsheet. " + err.Error()))
-			continue
-		}
-		err = Export(srv, newSpreadsheet.SpreadsheetId, pdfName)
-		if err != nil {
-			msg.ErrorWithoutExit(errors.New("No se pudo exportar el archivo de Google Sheet " + pdfName + " " + err.Error()))
-			continue
-		}
-		msg.Success("Pdf generado: " + pdfName)
+		go Pdf(srv, srvSheets, newSpreadsheet, &wg)
 	}
+	wg.Wait()
+
+	// Se eliminan las spreadsheets creadas
+	wg.Add(len(newSpreadsheets))
+	for _, newSpreadsheet := range newSpreadsheets {
+		go DeleteSpreadsheet(srv, newSpreadsheet, &wg)
+	}
+	wg.Wait()
 }
 
 func ExportSheetsInPDFAndSendEmail(opt SheetsOptions, emailOpt email.EmailOptions) {
